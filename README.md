@@ -33,18 +33,17 @@ npm install
 ```
 
 ### 3. Setup Environment Variables
-You will need to create a `.env` file at the root of the project to tell the app where your database and your email dispatcher are located. Create a `.env` and fill it out exactly like this:
+You will need to create a `.env` file at the root of the project to tell the app where your database is operating. Create a `.env` file and populate it like so:
+
 ```env
-# Create your local database file
+# Required: Local database file
 DATABASE_URL="file:./dev.db"
 
-# The generic Google account acting as the automated postman
-SMTP_EMAIL="your_developer_email@gmail.com"
-
-# Generate an "App Password" strictly from Google Security Settings
-SMTP_PASSWORD="xoxoxoxoxoxoxo"
+# Optional: To enable real OTP email deliveries
+SMTP_EMAIL="your_email@gmail.com"
+SMTP_PASSWORD="your_app_password"
 ```
-*(If you do not add an App Password, the app will safely default to **Simulation Mode** and simply print the OTP token to your backend terminal logs instead of sending a real email.)*
+*(Note: If you leave the SMTP fields completely blank, the application will cleverly default to **Simulation Mode**. Registration will still function locally, and it will simply print the 6-digit OTP code directly to your terminal logs rather than attempting an email delivery!)*
 
 ### 4. Initialize Database
 Running this command will physically create the `dev.db` SQLite file locally using the exact schema definitions we set up.
