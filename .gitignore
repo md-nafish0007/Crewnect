@@ -43,3 +43,6 @@ dist/
 /src/generated/prisma
 
 .vercel
+
+# Local project documentation
+UNDERSTANDING_CREWNECT.md
