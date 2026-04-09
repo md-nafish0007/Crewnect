@@ -11,7 +11,7 @@ interface Message {
   user: string;
 }
 
-export function ChatBox() {
+export function ChatBox({ currentUser }: { currentUser: { name: string } | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -39,7 +39,7 @@ export function ChatBox() {
     e.preventDefault();
     if (!input.trim() || !socketRef.current) return;
     
-    socketRef.current.emit("chat message", { text: input });
+    socketRef.current.emit("chat message", { text: input, user: currentUser ? currentUser.name : "Anonymous User" });
     setInput("");
   };
 
@@ -60,9 +60,11 @@ export function ChatBox() {
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white flex justify-between items-center shadow-md z-10">
         <div>
           <h3 className="font-bold flex items-center gap-2">
-            Global Anonymous Chat <span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span></span>
+            Global Chat <span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span></span>
           </h3>
-          <p className="text-xs text-blue-100 opacity-80">Talk with registered students</p>
+          <p className="text-xs text-blue-100 opacity-80">
+            {currentUser ? `Talking as ${currentUser.name}` : "Log in to chat"}
+          </p>
         </div>
         <button 
           onClick={() => setIsOpen(false)}
@@ -95,12 +97,13 @@ export function ChatBox() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message..."
-          className="flex-1 border-gray-200 bg-gray-50 rounded-full px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-inner"
+          disabled={!currentUser}
+          placeholder={currentUser ? "Type a message..." : "Log in to chat..."}
+          className="flex-1 border-gray-200 bg-gray-50 rounded-full px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-inner disabled:opacity-50"
         />
         <Button 
           type="submit" 
-          disabled={!input.trim()}
+          disabled={!input.trim() || !currentUser}
           className="rounded-full w-10 h-10 p-0 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition-colors shrink-0"
         >
           <Send size={16} className="-ml-1 mt-0.5 text-white" />

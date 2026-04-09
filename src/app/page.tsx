@@ -3,25 +3,22 @@ import { ChatBox } from "@/components/chat-box";
 import { Directory } from "@/components/directory";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { RegisterModal } from "@/components/register-modal";
-
-async function ensureMockData() {
-  const count = await prisma.student.count();
-  if (count === 0) {
-    await prisma.student.createMany({
-      data: [
-        { name: "User 1", email: "001@delhitechnicalcampus.ac.in", major: "Computer Science", gender: "Male", bio: "Looking for hackathon teammates!" },
-        { name: "User 2", email: "002@delhitechnicalcampus.ac.in", major: "Mechanical Engineering", gender: "Female", bio: "Robotics club enthusiast. Open to collaborations on hardware." },
-        { name: "User 3", email: "003@delhitechnicalcampus.ac.in", major: "Design", gender: "Female", bio: "UI/UX designer looking to build cool web apps." },
-        { name: "User 4", email: "004@delhitechnicalcampus.ac.in", major: "Data Science", gender: "Male", bio: "AI is the future. Currently exploring localized LLMs." },
-        { name: "User 5", email: "005@delhitechnicalcampus.ac.in", major: "Business", gender: "Male", bio: "Aspiring entrepreneur. Looking for technical co-founders." },
-        { name: "User 6", email: "006@delhitechnicalcampus.ac.in", major: "Biology", gender: "Female", bio: "Bioinformatics research. I love analyzing huge datasets." },
-      ]
-    });
-  }
-}
+import { LoginModal } from "@/components/login-modal";
+import { UserProfile } from "@/components/user-profile";
+import { getSession } from "@/lib/auth";
 
 export default async function Home() {
-  await ensureMockData();
+  const session = await getSession();
+  let currentUser = null;
+  if (session && session.userId) {
+    // using Prisma in server component
+    const userResult = await prisma.student.findUnique({
+      where: { id: session.userId as string },
+      select: { id: true, name: true, email: true }
+    });
+    if (userResult) currentUser = userResult;
+  }
+
   const students = await prisma.student.findMany({
     orderBy: { createdAt: 'asc' }
   });
@@ -48,8 +45,15 @@ export default async function Home() {
           <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-8 animate-in slide-in-from-bottom-5">
             Discover fellow registered students categorized by gender, and jump into the global chat to connect instantly.
           </p>
-          <div className="flex justify-center">
-            <RegisterModal />
+          <div className="flex justify-center gap-4">
+            {currentUser ? (
+              <UserProfile user={currentUser} />
+            ) : (
+              <>
+                <LoginModal />
+                <RegisterModal />
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -58,7 +62,7 @@ export default async function Home() {
       <Directory students={students} />
 
       {/* Floating Chat Component */}
-      <ChatBox />
+      <ChatBox currentUser={currentUser} />
     </div>
   );
 }

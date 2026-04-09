@@ -35,7 +35,7 @@ app.prepare().then(() => {
       io.emit("chat message", {
         id: Date.now().toString(),
         text: msg.text,
-        user: "Anonymous Student",
+        user: msg.user || "Anonymous User",
       });
     });
 
