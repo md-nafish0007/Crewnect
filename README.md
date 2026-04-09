@@ -1,58 +1,61 @@
-# Turborepo Tailwind CSS starter
+# Crewnect 🚀
 
-This Turborepo starter is maintained by the Turborepo core team.
+Crewnect is a modern, student-centric networking application designed specifically for college campuses. It allows students to create structured profiles, highlight their major, current year of study, and technical interests to easily discover and connect with peers for projects, hackathons, or general collaboration!
 
-## Using this example
+## 🌟 Features
+- **OTP Email Authentication:** Security first! Registration enforces domain-specific email addresses (e.g. `@delhitechnicalcampus.ac.in`) and uses Nodemailer to send a 6-digit confirmation OTP directly to the user's inbox.
+- **JWT Session Management:** Employs secure, HTTP-only cookies storing encrypted JSON Web Tokens to easily maintain user sessions securely across the application.
+- **Structured Tech Profiles:** Profile matching is simple through pre-defined toggleable tech stacks (Frontend, AI/ML, DevOps, UI/UX, etc.) and dropdown majors.
+- **Live Directory Dashboard:** Instantly browse registered students with beautiful pill-shaped badge UI layouts.
+- **Real-time Global Chat:** Powered by Socket.io, logged-in members can securely chat together instantly across the platform seamlessly.
 
-Run the following command:
+## 🛠 Tech Stack
+- **Frontend**: Next.js (App Router), React, Tailwind CSS, Lucide Icons
+- **Backend**: Next.js Route Handlers (API), Node.js
+- **Database**: SQLite with Prisma ORM
+- **Security & Validation**: Zod (Schema validation), Bcryptjs (Password Hashing), Jose (JWT construction)
+- **Email Delivery**: Nodemailer
 
-```sh
-npx create-turbo@latest -e with-tailwind
+---
+
+## 💻 How to Clone and Run Locally
+This repository is 100% ready for deployment or local execution! Follow these steps to spin it up in less than 5 minutes.
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/md-nafish0007/Crewnect.git
+cd Crewnect
 ```
 
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `web`: another [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `ui`: a stub React component library with [Tailwind CSS](https://tailwindcss.com/) shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Building packages/ui
-
-This example is set up to produce compiled styles for `ui` components into the `dist` directory. The component `.tsx` files are consumed by the Next.js apps directly using `transpilePackages` in `next.config.ts`. This was chosen for several reasons:
-
-- Make sharing one `tailwind.config.ts` to apps and packages as easy as possible.
-- Make package compilation simple by only depending on the Next.js Compiler and `tailwindcss`.
-- Ensure Tailwind classes do not overwrite each other. The `ui` package uses a `ui-` prefix for it's classes.
-- Maintain clear package export boundaries.
-
-Another option is to consume `packages/ui` directly from source without building. If using this option, you will need to update the `tailwind.config.ts` in your apps to be aware of your package locations, so it can find all usages of the `tailwindcss` class names for CSS compilation.
-
-For example, in [tailwind.config.ts](packages/tailwind-config/tailwind.config.ts):
-
-```js
-  content: [
-    // app content
-    `src/**/*.{js,ts,jsx,tsx}`,
-    // include packages if not transpiling
-    "../../packages/ui/*.{js,ts,jsx,tsx}",
-  ],
+### 2. Install Dependencies
+```bash
+npm install
 ```
 
-If you choose this strategy, you can remove the `tailwindcss` and `autoprefixer` dependencies from the `ui` package.
+### 3. Setup Environment Variables
+You will need to create a `.env` file at the root of the project to tell the app where your database and your email dispatcher are located. Create a `.env` and fill it out exactly like this:
+```env
+# Create your local database file
+DATABASE_URL="file:./dev.db"
 
-### Utilities
+# The generic Google account acting as the automated postman
+SMTP_EMAIL="your_developer_email@gmail.com"
 
-This Turborepo has some additional tools already setup for you:
+# Generate an "App Password" strictly from Google Security Settings
+SMTP_PASSWORD="xoxoxoxoxoxoxo"
+```
+*(If you do not add an App Password, the app will safely default to **Simulation Mode** and simply print the OTP token to your backend terminal logs instead of sending a real email.)*
 
-- [Tailwind CSS](https://tailwindcss.com/) for styles
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+### 4. Initialize Database
+Running this command will physically create the `dev.db` SQLite file locally using the exact schema definitions we set up.
+```bash
+npx prisma db push
+```
+*(Optional: Run `npx prisma studio` to open a clean GUI to inspect your live database records!).*
+
+### 5. Launch the Application!
+```bash
+npm run dev
+```
+
+Visit **`http://localhost:3000`** in your browser, register an account, enter your OTP, and explore the directory!
