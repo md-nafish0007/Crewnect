@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     // Zod Validation securely asserts data shape constraints
     const parsedParams = registerSchema.safeParse(body);
     if (!parsedParams.success) {
-      return NextResponse.json({ error: parsedParams.error.errors[0].message }, { status: 400 });
+      return NextResponse.json({ error: parsedParams.error.issues[0].message }, { status: 400 });
     }
 
     const { name, email, password, gender, major, bio, year, techStacks, otp } = parsedParams.data;
