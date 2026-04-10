@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { io, Socket } from "socket.io-client";
 import { Send, MessageCircle, X } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -15,32 +14,70 @@ export function ChatBox({ currentUser }: { currentUser: { name: string } | null 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const socketRef = useRef<Socket | null>(null);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
+  // Fetch messages from the serverless API
+  const fetchMessages = async () => {
+    try {
+      const res = await fetch("/api/chat");
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch messages:", err);
+    }
+  };
+
   useEffect(() => {
-    if (isOpen && !socketRef.current) {
-      // Connect to the same origin server.js
-      socketRef.current = io();
-      
-      socketRef.current.on("chat message", (msg: Message) => {
-        setMessages((prev) => [...prev, msg]);
-      });
+    let intervalId: NodeJS.Timeout;
+
+    if (isOpen) {
+      fetchMessages(); // Fetch immediately when opening
+
+      // Establish a lightweight HTTP short-polling loop every 2.5 seconds
+      intervalId = setInterval(() => {
+        fetchMessages();
+      }, 2500);
     }
 
-    return () => {};
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [isOpen]);
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isOpen]);
 
-  const sendMessage = (e: React.FormEvent) => {
+  const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !socketRef.current) return;
+    if (!input.trim()) return;
     
-    socketRef.current.emit("chat message", { text: input, user: currentUser ? currentUser.name : "Anonymous User" });
+    // Optimistic UI update for perceived instant speed
+    const tempMessage = {
+      id: Date.now().toString(),
+      text: input,
+      user: currentUser ? currentUser.name : "Anonymous User"
+    };
+    setMessages((prev) => [...prev, tempMessage]);
+    const messageToSend = input;
     setInput("");
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          text: messageToSend, 
+          user: currentUser ? currentUser.name : "Anonymous User" 
+        }),
+      });
+      // Silent refresh to ensure exact database sync
+      if (res.ok) fetchMessages();
+    } catch (err) {
+      console.error("Message send failed:", err);
+    }
   };
 
   if (!isOpen) {
