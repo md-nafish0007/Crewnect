@@ -29,7 +29,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="fixed top-6 right-6 z-50 rounded-full bg-white dark:bg-gray-900 shadow-md border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      className="fixed top-6 right-6 z-50 rounded-full w-10 h-10 flex items-center justify-center bg-white/60 dark:bg-gray-900/40 backdrop-blur-lg shadow-lg shadow-gray-200/20 dark:shadow-black/40 border border-white/50 dark:border-gray-800/50 hover:bg-white/90 dark:hover:bg-gray-800/80 hover:scale-110 transition-all duration-300"
       aria-label="Toggle Dark Mode"
     >
       {isDark ? (

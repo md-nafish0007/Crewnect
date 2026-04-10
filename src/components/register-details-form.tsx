@@ -42,7 +42,7 @@ export function RegisterDetailsForm({
             value={formData.name}
             onChange={e => setFormData({...formData, name: e.target.value})}
             className="w-full border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all dark:text-white"
-            placeholder="e.g. John Doe"
+            placeholder="Your Name"
           />
         </div>
         <div>
