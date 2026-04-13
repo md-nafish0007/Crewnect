@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserPlus, Clock, Check, MessageSquare, AlertCircle } from "lucide-react";
+import { UserPlus, Clock, Check, MessageSquare, AlertCircle, UserX } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function SocialButtons({ 
@@ -58,6 +58,27 @@ export function SocialButtons({
     setIsLoading(false);
   };
 
+  const handleCancelRequest = async () => {
+    const isUnfriend = status === "ACCEPTED";
+    if (isUnfriend && !confirm("Are you sure you want to remove this connection?")) return;
+
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/friend", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetId: targetUserId })
+      });
+      if (res.ok) {
+        setStatus("NONE");
+        router.refresh();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setIsLoading(false);
+  };
+
   const goToMessages = () => {
     router.push(`/messages?user=${targetUserId}`);
   };
@@ -92,10 +113,11 @@ export function SocialButtons({
 
       {status === "PENDING_SENT" && (
         <button 
-          disabled
-          className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-6 py-3 rounded-full font-semibold border border-gray-200 dark:border-gray-700"
+          onClick={handleCancelRequest}
+          disabled={isLoading}
+          className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/40 hover:text-red-600 px-6 py-3 rounded-full font-semibold border border-gray-200 dark:border-gray-700 transition-all"
         >
-          <Clock size={18} /> Request Sent (Pending)
+          <Clock size={18} /> {isLoading ? "Canceling..." : "Cancel Request"}
         </button>
       )}
 
@@ -110,12 +132,22 @@ export function SocialButtons({
       )}
 
       {status === "ACCEPTED" && (
-        <button 
-          onClick={goToMessages}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-600/20"
-        >
-          <MessageSquare size={18} /> Message Privately
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={goToMessages}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-600/20"
+          >
+            <MessageSquare size={18} /> Message Privately
+          </button>
+          <button 
+            onClick={handleCancelRequest}
+            disabled={isLoading}
+            className="p-3 rounded-full border border-gray-200 dark:border-gray-700 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group"
+            title="Unfriend"
+          >
+            <UserX size={18} className="transition-transform group-hover:scale-110" />
+          </button>
+        </div>
       )}
     </div>
   );

@@ -48,7 +48,7 @@ model DirectMessage {
   receiverId String
   text       String
   createdAt  DateTime @default(now())
-  read       Boolean  @default(false)
+  read       Boolean  @default(false) // true if receiver has read
 
   sender     Student  @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
   receiver   Student  @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)

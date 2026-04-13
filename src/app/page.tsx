@@ -7,7 +7,7 @@ import { RegisterModal } from "@/components/register-modal";
 import { LoginModal } from "@/components/login-modal";
 import { UserProfile } from "@/components/user-profile";
 import { getSession } from "@/lib/auth";
-import { MessageSquareDashed } from "lucide-react";
+import { InboxButton } from "@/components/inbox-button";
 
 export default async function Home() {
   const session = await getSession();
@@ -30,16 +30,7 @@ export default async function Home() {
       
       {/* Top Right Controls */}
       <ThemeToggle />
-      {currentUser && (
-        <Link 
-          href="/messages" 
-          className="fixed top-6 right-20 z-50 rounded-full w-10 h-10 bg-white dark:bg-gray-900 shadow-md border border-gray-200 dark:border-gray-800 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
-          title="My Inbox"
-        >
-          <MessageSquareDashed className="h-5 w-5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
-          <span className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></span>
-        </Link>
-      )}
+      {currentUser && <InboxButton />}
 
       {/* Hero Section */}
       <header className="relative bg-transparent overflow-hidden pb-16 pt-24 md:pt-32 transition-colors duration-500">

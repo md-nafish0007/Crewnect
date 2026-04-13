@@ -12,11 +12,13 @@ export default async function MessagesPage() {
 
   const userId = session.userId as string;
 
-  // Retrieve all ACCEPTED friend requests where the logged in user is either sender or receiver
-  const friendships = await prisma.friendRequest.findMany({
+  // Retrieve all friendships (ACCEPTED or PENDING_RECEIVED)
+  const relationships = await prisma.friendRequest.findMany({
     where: {
-      OR: [{ senderId: userId }, { receiverId: userId }],
-      status: "ACCEPTED",
+      OR: [
+        { senderId: userId, status: "ACCEPTED" }, 
+        { receiverId: userId } // include received PENDING and ACCEPTED
+      ],
     },
     include: {
       sender: { select: { id: true, name: true, avatarUrl: true } },
@@ -24,8 +26,15 @@ export default async function MessagesPage() {
     },
   });
 
-  const friends = friendships.map(f => {
-    return f.senderId === userId ? f.receiver : f.sender;
+  const connections = relationships.map(f => {
+    const isReceiver = f.receiverId === userId;
+    const friend = isReceiver ? f.sender : f.receiver;
+    return {
+      ...friend,
+      requestId: f.id,
+      status: f.status,
+      isIncoming: isReceiver && f.status === "PENDING"
+    };
   });
 
   return (
@@ -40,7 +49,7 @@ export default async function MessagesPage() {
       </header>
 
       <main className="flex-1 min-h-0 relative">
-        <InboxManager friends={friends} currentUserId={userId} />
+        <InboxManager connections={connections} currentUserId={userId} />
       </main>
     </div>
   );

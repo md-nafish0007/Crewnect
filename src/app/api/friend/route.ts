@@ -46,17 +46,53 @@ export async function PATCH(req: Request) {
   if (!session || !session.userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   
   const { requestId, action } = await req.json();
-  if (!requestId || action !== "ACCEPT") return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  if (!requestId || (action !== "ACCEPT" && action !== "REJECT")) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 
   try {
     const friendReq = await prisma.friendRequest.findUnique({ where: { id: requestId } });
     if (!friendReq || friendReq.receiverId !== session.userId) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+
+    if (action === "REJECT") {
+       await prisma.friendRequest.delete({ where: { id: requestId } });
+       return NextResponse.json({ success: true }, { status: 200 });
+    }
 
     const updated = await prisma.friendRequest.update({
       where: { id: requestId },
       data: { status: "ACCEPTED" }
     });
     return NextResponse.json(updated, { status: 200 });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  const session = await getSession();
+  if (!session || !session.userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  
+  const { targetId } = await req.json();
+  if (!targetId) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+
+  try {
+    // Delete any relationship (PENDING or ACCEPTED) between these two users
+    const friendReq = await prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          { senderId: session.userId as string, receiverId: targetId },
+          { senderId: targetId, receiverId: session.userId as string }
+        ]
+      }
+    });
+
+    if (!friendReq) return NextResponse.json({ error: "No connection found" }, { status: 404 });
+
+    await prisma.friendRequest.delete({
+      where: { id: friendReq.id }
+    });
+    
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Server Error" }, { status: 500 });
